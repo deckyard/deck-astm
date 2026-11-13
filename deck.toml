@@ -1,0 +1,18 @@
+[package]
+name = "@deckyard/astm"
+version = "0.1.0"
+description = "The ASTM protocol of clinical lab instruments, E1381 / E1394 (CLSI LIS01-A2 / LIS02-A2): records, results, orders, host queries, and the low-level link over TCP or serial"
+license = "LGPL-3.0-only"
+authors = ["mplx <mplx@jennifer-lang.dev>"]
+# The link runs over TCP, so the deck needs `net`. A serial port needs no
+# capability, only Linux and the default binary. No `exec`, no `sql`.
+capabilities = ["net"]
+keywords = ["astm", "lis", "lis01", "lis02", "e1394", "laboratory", "analyzer", "clsi"]
+
+[package.urls]
+deck = "https://raw.githubusercontent.com/deckyard/deck-astm/main/deck.toml"
+homepage = "https://github.com/deckyard/deck-astm"
+manual = "https://deckyard.github.io/deck-astm/"
+
+[engines]
+jennifer = ">=0.26.0"
