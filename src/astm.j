@@ -19,7 +19,7 @@
  * `Profile` for devices that differ. Input that breaks the rules is an
  * error, never repaired: a damaged frame is refused with NAK, as LIS01 asks,
  * and a transmission that does not parse is thrown. Every failure is
- * `Error{kind: "astm"}`.
+ * `Error{kind: "astm"}`, except a reached cap, kind `"limit"`.
  *
  * | topic | covers |
  * | --- | --- |

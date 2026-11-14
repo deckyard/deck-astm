@@ -355,7 +355,9 @@ func readByte(l as Link, ms as int) {
     try {
         $chunk = readChunk($l, $ms);
     } catch (e) {
-        if ($e.message == "task cancelled") {
+        # A cancel is kind "cancelled" (jennifer after 0.25); the message
+        # match is for older interpreters and goes with the next floor raise.
+        if ($e.kind == "cancelled" or $e.message == "task cancelled") {
             throw $e;
         }
         if ($e.kind == "timeout") {
@@ -421,12 +423,16 @@ func waitPipe(l as Link, ms as int) {
         try {
             return task.wait($waiter);
         } catch (e) {
-            if ($e.message != "task cancelled") {
+            # A cancel is kind "cancelled" (jennifer after 0.25); the message
+            # match is for older interpreters and goes with the next floor raise.
+            if (not ($e.kind == "cancelled" or $e.message == "task cancelled")) {
                 throw $e;
             }
         }
     } catch (e) {
-        if ($e.message == "task cancelled") {
+        # A cancel is kind "cancelled" (jennifer after 0.25); the message
+        # match is for older interpreters and goes with the next floor raise.
+        if ($e.kind == "cancelled" or $e.message == "task cancelled") {
             throw $e;
         }
         fail("the connection closed");
@@ -726,7 +732,7 @@ func settle(l as Link) {
  * @param l {Link} the link
  * @param waitMs {int} how long to wait for an ENQ: 0 to 86400000 ms, 0 to only look
  * @return {list of Message} the messages, empty when no transmission began in time or it held no frame
- * @throws {Error} kind "astm" when a frame does not follow within the frame timeout, the transmission exceeds the largest one or the limits above, its text is not valid in the encoding, its records do not parse, or the connection closed
+ * @throws {Error} kind "limit" when the transmission exceeds the largest one or the limits above; kind "astm" when a frame does not follow within the frame timeout, its text is not valid in the encoding, its records do not parse, or the connection closed
  * @example
  *   for (def m in astm.receive($link, 1000)) {
  *       for (def r in astm.results($m)) {
@@ -823,7 +829,7 @@ func transferIn(l as Link) {
             } elseif ($f.number == $expected) {
                 $total = $total + len($f.text);
                 if ($total > $p.maxBytes) {
-                    fail(io.sprintf("the transmission exceeds %d bytes", $p.maxBytes));
+                    failLimit(io.sprintf("the transmission exceeds %d bytes", $p.maxBytes));
                 }
                 $parts[] = $f.text;
                 $ended = $f.final;
@@ -855,11 +861,11 @@ func transferIn(l as Link) {
  * @param wire {int} the bytes read in this transmission
  * @param stalled {int} the frames in a row refused or repeated
  * @param p {Profile} the profile
- * @throws {Error} kind "astm" when either limit is passed
+ * @throws {Error} kind "limit" when the line carries too many bytes; kind "astm" when too many frames in a row were refused
  */
 func checkProgress(wire as int, stalled as int, p as Profile) {
     if ($wire > 2 * $p.maxBytes) {
-        fail(io.sprintf("more than %d bytes on the line in one transmission", 2 * $p.maxBytes));
+        failLimit(io.sprintf("more than %d bytes on the line in one transmission", 2 * $p.maxBytes));
     }
     if ($stalled > $p.retries + 1) {
         fail(io.sprintf("%d frames in a row were refused or repeated", $stalled));
@@ -896,7 +902,7 @@ func readFrame(l as Link) {
         }
         $count = $count + 1;
         if ($count > $p.maxBytes) {
-            fail(io.sprintf("a frame exceeds %d bytes", $p.maxBytes));
+            failLimit(io.sprintf("a frame exceeds %d bytes", $p.maxBytes));
         }
         if ($count <= $limit) {
             $raw[] = $b;

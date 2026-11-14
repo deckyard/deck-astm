@@ -205,13 +205,13 @@ func parseRecord(text as string, d as Delimiters) {
  * @param line {string} the record
  * @param d {Delimiters} its delimiters
  * @return {int} the new count
- * @throws {Error} kind "astm" past `MAX_FIELDS`
+ * @throws {Error} kind "limit" past `MAX_FIELDS`
  */
 func countFields(count as int, line as string, d as Delimiters) {
     def total as int init $count + strings.count($line, $d.field) +
         strings.count($line, $d.repetition) + strings.count($line, $d.component) + 1;
     if ($total > MAX_FIELDS) {
-        fail(io.sprintf("more than %d fields, repeats and components", MAX_FIELDS));
+        failLimit(io.sprintf("more than %d fields, repeats and components", MAX_FIELDS));
     }
     return $total;
 }
@@ -223,7 +223,7 @@ func countFields(count as int, line as string, d as Delimiters) {
  *
  * @param text {string} the records
  * @return {list of Message} the messages in order
- * @throws {Error} kind "astm" when the text is empty, a record does not end with a CR, a record comes before an H or after its L, a message lacks its L, a record does not parse, or the text holds more than `MAX_RECORDS` records or `MAX_FIELDS` fields, repeats and components
+ * @throws {Error} kind "astm" when the text is empty, a record does not end with a CR, a record comes before an H or after its L, a message lacks its L, or a record does not parse; kind "limit" when the text holds more than `MAX_RECORDS` records or `MAX_FIELDS` fields, repeats and components
  * @example
  *   for (def m in astm.parse($text)) {
  *       io.printf("%d records\n", len($m.records));
@@ -237,7 +237,7 @@ export func parse(text as string) {
         fail("the last record does not end with a CR: " + shown($text));
     }
     if (strings.count($text, CR_TEXT) > MAX_RECORDS) {
-        fail(io.sprintf("more than %d records", MAX_RECORDS));
+        failLimit(io.sprintf("more than %d records", MAX_RECORDS));
     }
     def lines as list of string init strings.split($text[..len($text) - 1], CR_TEXT);
     def fields as int init 0;

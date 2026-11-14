@@ -31,7 +31,9 @@ import "@deckyard/astm/" as astm;
 ```
 
 Every failure is `Error{kind: "astm"}` with a message that names what broke
-the rules. The deck is strict: input that breaks LIS01 or LIS02 is refused,
+the rules, except a reached cap - a transmission, frame or line over
+`maxBytes`, more than `MAX_RECORDS` records or `MAX_FIELDS` fields - which is
+kind `"limit"`. The deck is strict: input that breaks LIS01 or LIS02 is refused,
 never repaired. A damaged frame is answered with NAK, as LIS01 asks, so the
 sender sends it again; a transmission whose records do not parse is thrown
 by `receive`. Instruments that differ from the standard in a documented way

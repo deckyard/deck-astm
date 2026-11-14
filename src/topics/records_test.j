@@ -75,12 +75,28 @@ func testParseRefusesWhatBreaksTheRules() {
     testing.assertEqual(parseError(SAMPLE), "");
 }
 
+/**
+ * The message of a parse past a cap, which must be kind "limit".
+ *
+ * @param text {string} the text to parse
+ * @return {string} the message, "" when it parsed
+ */
+func capError(text as string) {
+    try {
+        parse($text);
+    } catch (e) {
+        testing.assertEqual($e.kind, "limit");
+        return $e.message;
+    }
+    return "";
+}
+
 func testParseCapsWhatItHolds() {
     testing.assertEqual(
-        parseError("H|\\^&\rP" + strings.repeat("|", MAX_FIELDS) + "\rL|1\r"),
+        capError("H|\\^&\rP" + strings.repeat("|", MAX_FIELDS) + "\rL|1\r"),
         "astm: more than 65536 fields, repeats and components");
     testing.assertEqual(
-        parseError(strings.repeat("\r", MAX_RECORDS + 1)),
+        capError(strings.repeat("\r", MAX_RECORDS + 1)),
         "astm: more than 4096 records");
     testing.assertEqual(
         parseError("H|\\^&\rP" + strings.repeat("|", MAX_FIELDS - 7) + "\rL|1\r"),

@@ -534,6 +534,7 @@ func testReceiveCapsTheTransmission() {
         receive($l, 1000);
         missed("too big");
     } catch (e) {
+        testing.assertEqual($e.kind, "limit");
         testing.assertEqual($e.message, "astm: the transmission exceeds 1024 bytes");
     }
     task.discard($p);
@@ -649,6 +650,7 @@ func testReceiveStopsANoisyOrStuckSender() {
         receive($l, 1000);
         missed("noise");
     } catch (e) {
+        testing.assertEqual($e.kind, "limit");
         testing.assertEqual(
             $e.message,
             "astm: more than 2048 bytes on the line in one transmission");

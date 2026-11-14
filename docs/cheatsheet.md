@@ -10,7 +10,8 @@ Every export of `@deckyard/astm`. Guides are listed in
 import "@deckyard/astm/" as astm;
 ```
 
-Every failure is `Error{kind: "astm"}`. An `r` argument is a `Record`, an
+Every failure is `Error{kind: "astm"}`, except a reached cap (more records,
+fields or bytes than the limits allow), which is kind `"limit"`. An `r` argument is a `Record`, an
 `m` a `Message`, a `d` `Delimiters`, an `l` a `Link`, a `p` a `Profile`.
 Fields, repeats and components are numbered from 1, as LIS02 numbers them:
 field 1 is the record type.
