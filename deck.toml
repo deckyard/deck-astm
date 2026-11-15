@@ -1,6 +1,6 @@
 [package]
 name = "@deckyard/astm"
-version = "0.1.0"
+version = "0.2.0"
 description = "The ASTM protocol of clinical lab instruments, E1381 / E1394 (CLSI LIS01-A2 / LIS02-A2): records, results, orders, host queries, and the low-level link over TCP or serial"
 license = "LGPL-3.0-only"
 authors = ["mplx <mplx@jennifer-lang.dev>"]
