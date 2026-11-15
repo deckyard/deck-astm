@@ -50,6 +50,40 @@ func failLimit(message as string) {
 }
 
 /**
+ * Throw a timer that ran out: kind "timeout", the message as `fail` writes
+ * it.
+ *
+ * @param message {string} what did not come in time, without the `astm: ` prefix
+ * @throws {Error} kind "timeout", always
+ */
+func failTimeout(message as string) {
+    throw Error{kind: "timeout", message: "astm: " + $message};
+}
+
+/**
+ * Throw a connection the other side closed: kind "closed", the message as
+ * `fail` writes it.
+ *
+ * @param message {string} what closed, without the `astm: ` prefix
+ * @throws {Error} kind "closed", always
+ */
+func failClosed(message as string) {
+    throw Error{kind: "closed", message: "astm: " + $message};
+}
+
+/**
+ * Whether a caught error has a kind every library shares, which a wrapper
+ * passes on as it is: a reached cap, a deadline, a closed connection, a
+ * cancelled task or a network failure (a `net.NetError`).
+ *
+ * @param kind {string} the error's kind
+ * @return {bool} whether it passes on
+ */
+func generic(kind as string) {
+    return lists.contains(["limit", "timeout", "closed", "cancelled", "net"], $kind);
+}
+
+/**
  * Text quoted for an error message: at most 80 characters, control and bidi
  * characters as `?`.
  *

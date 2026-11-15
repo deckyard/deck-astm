@@ -77,7 +77,8 @@ up to `retries` (6) times, once the line has been quiet for 50 ms, so a
 late ACK to the first copy is not taken as the reply to the second. A NAK
 to the ENQ means the receiver is busy and is waited out (`busyWaitMs`,
 10 s) as often. No reply within the reply
-timeout (15 s) ends the transmission with EOT and fails. An EOT in reply to
+timeout (15 s) ends the transmission with EOT and fails with kind
+`"timeout"`. An EOT in reply to
 a frame is the receiver asking to stop; LIS01 lets a sender carry on, and
 `send` does, taking it as the ACK.
 
