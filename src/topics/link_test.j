@@ -276,6 +276,7 @@ func testSendTimesOutAndEndsTheTransmission() {
         send($l, parse(SMALL));
         missed("silence");
     } catch (e) {
+        testing.assertEqual($e.kind, "timeout");
         testing.assertEqual($e.message, "astm: no reply to ENQ within 400 ms");
     }
     testing.assertEqual(task.wait($p), "<ENQ>;<EOT>");
@@ -284,6 +285,7 @@ func testSendTimesOutAndEndsTheTransmission() {
         send($l, parse(SMALL));
         missed("silence after a frame");
     } catch (e) {
+        testing.assertEqual($e.kind, "timeout");
         testing.assertEqual($e.message, "astm: no reply to frame 1 within 400 ms");
     }
     testing.assertEqual(task.wait($q), "<ENQ>;" + SMALL_H + ";<EOT>");
@@ -455,6 +457,7 @@ func testReceiveFailsWhenTheSenderStops() {
         receive($l, 1000);
         missed("silence");
     } catch (e) {
+        testing.assertEqual($e.kind, "timeout");
         testing.assertEqual(
             $e.message,
             "astm: no frame within 400 ms; the transmission is dropped");
@@ -465,6 +468,7 @@ func testReceiveFailsWhenTheSenderStops() {
         receive($l, 1000);
         missed("a frame cut off");
     } catch (e) {
+        testing.assertEqual($e.kind, "timeout");
         testing.assertEqual(
             $e.message,
             "astm: a frame did not end within 400 ms; the transmission is dropped");
@@ -592,6 +596,8 @@ func testOverTcp() {
         receive($link, 3000);
         missed("a closed connection");
     } catch (e) {
+        # the other side closing is the generic kind "closed"
+        testing.assertEqual($e.kind, "closed");
         testing.assertEqual($e.message, "astm: the connection closed");
     }
     close($link);
@@ -601,13 +607,14 @@ func testOverTcp() {
         accept($server, profile());
         missed("a closed listener");
     } catch (e) {
-        testing.assertContains($e.message, "astm: accept:");
+        # net's own error for a closed listener, passed on as it is
+        testing.assertEqual($e.kind, "closed");
     }
     try {
         connect($address, $p);
         missed("nobody listening");
     } catch (e) {
-        testing.assertContains($e.message, "astm: cannot reach");
+        testing.assertEqual($e.kind, "net");
     }
     try {
         listen("127.0.0.1:99999");
@@ -615,6 +622,58 @@ func testOverTcp() {
     } catch (e) {
         testing.assertContains($e.message, "astm: cannot listen on");
     }
+}
+
+func testNetErrorsPassOnWithTheirFields() {
+    def server as net.Listener init listen("127.0.0.1:0");
+    def address as string init net.address($server);
+    net.close($server);
+    try {
+        connect($address, profile());
+        missed("nobody listening");
+    } catch (e) {
+        testing.assertEqual($e.kind, "net");
+        def ne as net.NetError init $e;
+        testing.assertEqual($ne.op, "connect");
+        testing.assertEqual($ne.reason, "refused");
+    }
+    $server = listen("127.0.0.1:0");
+    $address = net.address($server);
+    def peer as task of bool init spawn {
+        def conn as net.Conn init net.accept($server);
+        time.sleep(time.fromMilliseconds(100));
+        net.abort($conn);
+        return true;
+    };
+    def link as Link init connect($address, profile());
+    task.wait($peer);
+    try {
+        receive($link, 3000);
+        missed("a reset connection");
+    } catch (e) {
+        testing.assertEqual($e.kind, "net");
+        def ne as net.NetError init $e;
+        testing.assertEqual($ne.reason, "reset");
+    }
+    close($link);
+    net.close($server);
+}
+
+# A line that does not go quiet after a refused frame is a reached cap.
+func testANoisyLineAfterARefusalIsALimit() {
+    def l as Link init pipe();
+    $l.profile.maxBytes = 1024;
+    def p as task of string init peer(
+        $l,
+        ["r", "w <ACK>", "r", "w <NAK>" + strings.repeat("x", 3000)]);
+    try {
+        send($l, parse(SMALL));
+        missed("a noisy line");
+    } catch (e) {
+        testing.assertEqual($e.kind, "limit");
+        testing.assertEqual($e.message, "astm: the line does not go quiet after a refused frame");
+    }
+    task.wait($p);
 }
 
 func testALateReplyDoesNotShiftTheReplies() {

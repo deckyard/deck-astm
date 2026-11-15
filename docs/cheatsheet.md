@@ -10,8 +10,12 @@ Every export of `@deckyard/astm`. Guides are listed in
 import "@deckyard/astm/" as astm;
 ```
 
-Every failure is `Error{kind: "astm"}`, except a reached cap (more records,
-fields or bytes than the limits allow), which is kind `"limit"`. An `r` argument is a `Record`, an
+Every failure is `Error{kind: "astm"}`, except the generic kinds: a reached
+cap (more records, fields or bytes than the limits allow) is `"limit"`, a
+LIS01 timer or write deadline that ran out `"timeout"`, a connection the other
+side closed `"closed"`, a cancelled task `"cancelled"`, and a failed TCP
+connection (refused, reset, unreachable) `net`'s `net.NetError` (kind
+`"net"`, with `op` and `reason`). An `r` argument is a `Record`, an
 `m` a `Message`, a `d` `Delimiters`, an `l` a `Link`, a `p` a `Profile`.
 Fields, repeats and components are numbered from 1, as LIS02 numbers them:
 field 1 is the record type.

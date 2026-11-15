@@ -19,7 +19,11 @@
  * `Profile` for devices that differ. Input that breaks the rules is an
  * error, never repaired: a damaged frame is refused with NAK, as LIS01 asks,
  * and a transmission that does not parse is thrown. Every failure is
- * `Error{kind: "astm"}`, except a reached cap, kind `"limit"`.
+ * `Error{kind: "astm"}`, except the kinds every library shares: a reached
+ * cap is `"limit"`, a timer that ran out `"timeout"`, a connection the other
+ * side closed `"closed"`, a cancelled task `"cancelled"`, and a failed TCP
+ * connection (refused, reset, unreachable) the `net.NetError` of kind
+ * `"net"` that `net` threw.
  *
  * | topic | covers |
  * | --- | --- |

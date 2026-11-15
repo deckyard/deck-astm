@@ -220,7 +220,7 @@ func startLink(kind as string, conn as net.Conn, port as serial.Port, p as Profi
  * @param address {string} `host:port`
  * @param p {Profile} how this side behaves
  * @return {Link} the link
- * @throws {Error} kind "astm" when the profile is invalid or the address cannot be reached within the reply timeout
+ * @throws {Error} kind "astm" when the profile is invalid; kind "timeout" when the address cannot be reached within the reply timeout; kind "net" (a `net.NetError`) when the connection is refused or fails
  * @example
  *   def link as astm.Link init astm.connect("10.0.0.20:4001", astm.profile());
  */
@@ -230,6 +230,10 @@ export func connect(address as string, p as Profile) {
     try {
         $conn = net.connect($address, $p.replyTimeoutMs);
     } catch (e) {
+        # the kinds every library shares pass on as they are
+        if (generic($e.kind)) {
+            throw $e;
+        }
         fail("cannot reach " + shown($address) + ": " + $e.message);
     }
     return startLink("tcp", $conn, serial.Port{}, $p);
@@ -240,7 +244,7 @@ export func connect(address as string, p as Profile) {
  *
  * @param address {string} `host:port`, `:4001` for every address
  * @return {net.Listener} the listener, for `accept`; `net.close` stops it
- * @throws {Error} kind "astm" when the address cannot be bound
+ * @throws {Error} kind "astm" when the address is malformed; kind "net" (a `net.NetError`) when it cannot be bound
  * @example
  *   def server as net.Listener init astm.listen(":4001");
  *   def link as astm.Link init astm.accept($server, astm.profile());
@@ -249,6 +253,10 @@ export func listen(address as string) {
     try {
         return net.listen($address);
     } catch (e) {
+        # the kinds every library shares pass on as they are
+        if (generic($e.kind)) {
+            throw $e;
+        }
         fail("cannot listen on " + shown($address) + ": " + $e.message);
     }
 }
@@ -259,7 +267,7 @@ export func listen(address as string) {
  * @param listener {net.Listener} from `listen`
  * @param p {Profile} how this side behaves
  * @return {Link} the link
- * @throws {Error} kind "astm" when the profile is invalid or the listener fails or is closed
+ * @throws {Error} kind "astm" when the profile is invalid; kind "closed" when the listener is closed; kind "net" (a `net.NetError`) when it fails
  */
 export func accept(listener as net.Listener, p as Profile) {
     checkProfile($p);
@@ -267,6 +275,10 @@ export func accept(listener as net.Listener, p as Profile) {
     try {
         $conn = net.accept($listener);
     } catch (e) {
+        # the kinds every library shares pass on as they are
+        if (generic($e.kind)) {
+            throw $e;
+        }
         fail("accept: " + $e.message);
     }
     return startLink("tcp", $conn, serial.Port{}, $p);
@@ -342,7 +354,7 @@ func since(start as time.Time) {
  * @param l {Link} the link
  * @param ms {int} how long to wait, 0 to only look
  * @return {int} the byte, -1 when none came in time
- * @throws {Error} kind "astm" when the connection closed or failed
+ * @throws {Error} kind "closed" when the connection closed; kind "net" (a `net.NetError`) when it failed
  */
 func readByte(l as Link, ms as int) {
     if (channel.len($l.input) > 0) {
@@ -364,12 +376,16 @@ func readByte(l as Link, ms as int) {
             return -1;
         }
         if ($e.kind == "closed") {
-            fail("the connection closed");
+            failClosed("the connection closed");
+        }
+        # the kinds every library shares pass on as they are
+        if (generic($e.kind)) {
+            throw $e;
         }
         fail("the connection failed: " + $e.message);
     }
     if (len($chunk) == 0) {
-        fail("the connection closed");
+        failClosed("the connection closed");
     }
     for (def i in 1..len($chunk)) {
         channel.send($l.input, $chunk[$i]);
@@ -435,7 +451,7 @@ func waitPipe(l as Link, ms as int) {
         if ($e.kind == "cancelled" or $e.message == "task cancelled") {
             throw $e;
         }
-        fail("the connection closed");
+        failClosed("the connection closed");
     }
     return -1;
 }
@@ -445,7 +461,7 @@ func waitPipe(l as Link, ms as int) {
  *
  * @param l {Link} the link
  * @param data {bytes} the bytes
- * @throws {Error} kind "astm" when the connection fails or a write takes longer than the reply timeout
+ * @throws {Error} kind "timeout" when a write takes longer than the reply timeout; kind "closed" when the connection is closed; kind "net" (a `net.NetError`) when it fails
  */
 func transmit(l as Link, data as bytes) {
     try {
@@ -461,6 +477,10 @@ func transmit(l as Link, data as bytes) {
             }
         }
     } catch (e) {
+        # the kinds every library shares pass on as they are
+        if (generic($e.kind)) {
+            throw $e;
+        }
         fail("cannot send: " + $e.message);
     }
 }
@@ -581,7 +601,7 @@ func piecesOf(messages as list of Message, p as Profile) {
  *
  * @param l {Link} the link
  * @param messages {list of Message} the messages
- * @throws {Error} kind "astm" when nothing is to be sent, a record cannot be encoded, no reply comes within the reply timeout, a frame is refused more often than the retries allow, the receiver stays busy, or the connection fails; a transmission begun is ended with EOT
+ * @throws {Error} kind "astm" when nothing is to be sent, a record cannot be encoded, a frame is refused more often than the retries allow, or the receiver stays busy; kind "timeout" when no reply comes within the reply timeout; kind "closed" or "net" (a `net.NetError`) when the connection closes or fails; a transmission begun is ended with EOT
  * @example
  *   astm.send($link, [astm.orderMessage("LIS", $orders, "N")]);
  */
@@ -603,7 +623,7 @@ export func send(l as Link, messages as list of Message) {
  * The establishment phase: ENQ until the receiver answers ACK.
  *
  * @param l {Link} the link
- * @throws {Error} kind "astm" when no reply comes, the receiver stays busy, contention repeats more often than the retries allow, or the receiver answers something else
+ * @throws {Error} kind "timeout" when no reply comes; kind "astm" when the receiver stays busy, contention repeats more often than the retries allow, or the receiver answers something else
  */
 func establish(l as Link) {
     def p as Profile init $l.profile;
@@ -618,7 +638,7 @@ func establish(l as Link) {
         }
         if ($reply == -1) {
             transmit($l, control(EOT));
-            fail(io.sprintf("no reply to ENQ within %d ms", $p.replyTimeoutMs));
+            failTimeout(io.sprintf("no reply to ENQ within %d ms", $p.replyTimeoutMs));
         }
         if ($reply == NAK) {
             $busy = $busy + 1;
@@ -663,7 +683,7 @@ func establish(l as Link) {
  * @param l {Link} the link
  * @param f {bytes} the frame
  * @param number {int} its number, for messages
- * @throws {Error} kind "astm" when no reply comes or it is refused more often than the retries allow
+ * @throws {Error} kind "timeout" when no reply comes; kind "astm" when it is refused more often than the retries allow
  */
 func sendFrame(l as Link, f as bytes, number as int) {
     def refused as int init 0;
@@ -675,7 +695,7 @@ func sendFrame(l as Link, f as bytes, number as int) {
         }
         if ($reply == -1) {
             transmit($l, control(EOT));
-            fail(io.sprintf(
+            failTimeout(io.sprintf(
                 "no reply to frame %d within %d ms",
                 $number,
                 $l.profile.replyTimeoutMs));
@@ -707,14 +727,14 @@ func drain(l as Link) {
  * to a refused frame is not taken as the reply to its next copy.
  *
  * @param l {Link} the link
- * @throws {Error} kind "astm" when more than the largest transmission arrives without a pause
+ * @throws {Error} kind "limit" when more than the largest transmission arrives without a pause
  */
 func settle(l as Link) {
     def dropped as int init 0;
     while (readByte($l, SETTLE_MS) != -1) {
         $dropped = $dropped + 1;
         if ($dropped > $l.profile.maxBytes) {
-            fail("the line does not go quiet after a refused frame");
+            failLimit("the line does not go quiet after a refused frame");
         }
     }
 }
@@ -732,7 +752,7 @@ func settle(l as Link) {
  * @param l {Link} the link
  * @param waitMs {int} how long to wait for an ENQ: 0 to 86400000 ms, 0 to only look
  * @return {list of Message} the messages, empty when no transmission began in time or it held no frame
- * @throws {Error} kind "limit" when the transmission exceeds the largest one or the limits above; kind "astm" when a frame does not follow within the frame timeout, its text is not valid in the encoding, its records do not parse, or the connection closed
+ * @throws {Error} kind "limit" when the transmission exceeds the largest one or the limits above; kind "timeout" when a frame does not follow or end within the frame timeout; kind "astm" when its text is not valid in the encoding or its records do not parse; kind "closed" when the connection closed; kind "net" (a `net.NetError`) when it fails
  * @example
  *   for (def m in astm.receive($link, 1000)) {
  *       for (def r in astm.results($m)) {
@@ -809,7 +829,7 @@ func transferIn(l as Link) {
             $b = readByte($l, $p.frameTimeoutMs);
         }
         if ($b == -1) {
-            fail(io.sprintf(
+            failTimeout(io.sprintf(
                 "no frame within %d ms; the transmission is dropped",
                 $p.frameTimeoutMs));
         }
@@ -886,7 +906,7 @@ func readFrame(l as Link) {
     while (true) {
         def b as int init readByte($l, $p.frameTimeoutMs);
         if ($b == -1) {
-            fail(io.sprintf(
+            failTimeout(io.sprintf(
                 "a frame did not end within %d ms; the transmission is dropped",
                 $p.frameTimeoutMs));
         }

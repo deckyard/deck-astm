@@ -33,7 +33,12 @@ import "@deckyard/astm/" as astm;
 Every failure is `Error{kind: "astm"}` with a message that names what broke
 the rules, except a reached cap - a transmission, frame or line over
 `maxBytes`, more than `MAX_RECORDS` records or `MAX_FIELDS` fields - which is
-kind `"limit"`. The deck is strict: input that breaks LIS01 or LIS02 is refused,
+kind `"limit"`. The other kinds every library shares are used too: a LIS01
+timer that runs out (no reply to ENQ or a frame, no frame or the end of one)
+or a write past its deadline is `"timeout"`, a connection the other side
+closed `"closed"`, a cancelled task `"cancelled"`, and a failed TCP connection
+(refused, reset, unreachable) the `net.NetError` (kind `"net"`) that `net`
+threw, so its `op` and `reason` can be read once the kind matches. The deck is strict: input that breaks LIS01 or LIS02 is refused,
 never repaired. A damaged frame is answered with NAK, as LIS01 asks, so the
 sender sends it again; a transmission whose records do not parse is thrown
 by `receive`. Instruments that differ from the standard in a documented way
