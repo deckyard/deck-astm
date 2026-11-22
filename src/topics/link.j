@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
 # SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
-# pragma-jennifer-version: >=0.26.0
+# pragma-jennifer-version: >=0.27.0
 
 # astm - link: the LIS01 (E1381) low-level protocol over TCP or a serial
 # port. Establishment (ENQ / ACK / NAK / EOT), frames with numbers and
@@ -165,7 +165,7 @@ func checkProfile(p as Profile) {
 func encodeText(s as string, name as string) {
     try {
         if ($name == "utf-8") {
-            return convert.bytesFromString("utf-8", $s);
+            return encoding.encode("utf-8", $s);
         }
         return encoding.encode($name, $s);
     } catch (e) {
@@ -184,7 +184,7 @@ func encodeText(s as string, name as string) {
 func decodeText(b as bytes, name as string) {
     try {
         if ($name == "utf-8") {
-            return convert.stringFromBytes("utf-8", $b);
+            return encoding.decode("utf-8", $b);
         }
         return encoding.decode($name, $b);
     } catch (e) {
@@ -582,7 +582,7 @@ func piecesOf(messages as list of Message, p as Profile) {
                 if ($end > len($text)) {
                     $end = len($text);
                 }
-                $out[] = Piece{text: binary.slice($text, $at, $end), final: $end == len($text)};
+                $out[] = Piece{text: $text[$at..$end], final: $end == len($text)};
                 $at = $end;
             }
         }
@@ -975,12 +975,12 @@ func frameOf(raw as bytes) {
         $bad.problem = "no ETX or ETB";
         return $bad;
     }
-    def sum as int init checksum(binary.slice($raw, 0, $n - 4));
+    def sum as int init checksum($raw[..$n - 4]);
     if ($raw[$n - 4] != hexCode($sum // 16) or $raw[$n - 3] != hexCode($sum % 16)) {
         $bad.problem = "a wrong checksum";
         return $bad;
     }
-    def text as bytes init binary.slice($raw, 1, $n - 5);
+    def text as bytes init $raw[1..$n - 5];
     for (def i in 0..len($text)) {
         def b as int init $text[$i];
         if (($b < 32 and $b != CR) or $b == 127) {

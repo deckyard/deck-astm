@@ -43,7 +43,7 @@ astm.close($link);
 
 ## Requirements
 
-Jennifer 0.26.0 or newer and the default `jennifer` binary: the deck needs
+Jennifer 0.27.0 or newer and the default `jennifer` binary: the deck needs
 `net`, which the stock `jennifer-tiny` lacks. A serial port needs Linux.
 
 ## Development

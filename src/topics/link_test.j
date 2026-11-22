@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
 # SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
-# pragma-jennifer-version: >=0.26.0
+# pragma-jennifer-version: >=0.27.0
 
 # astm - white-box tests for the link topic. Spliced into astm_test.j via
 # include.
@@ -185,7 +185,7 @@ func testChecksumsAndFrames() {
     testing.assertEqual(
         named(frame(1, wire("P|1|PAT-1"), false)),
         "<STX>1P|1|PAT-1<ETB>04<CR><LF>");
-    testing.assertEqual(frameOf(binary.slice(frame(7, wire("x"), true), 1)).number, 7);
+    testing.assertEqual(frameOf(frame(7, wire("x"), true)[1..]).number, 7);
 }
 
 func testSendFramesEveryRecord() {
@@ -321,7 +321,7 @@ func testSendRefusesWhatItCannotSend() {
     def big as Link init pipe();
     $big.profile.maxBytes = 1024;
     try {
-        send($big, parse("H|\\^&\rC|1|I|" + strings.repeat("x", 1100) + "\rL|1\r"));
+        send($big, parse("H|\\^&\rC|1|I|" + strings.replicate("x", 1100) + "\rL|1\r"));
         missed("too big");
     } catch (e) {
         testing.assertEqual(
@@ -422,7 +422,7 @@ func testReceiveRefusesDamagedFrames() {
             "r",
             "f 2 L|1|<NAK>",
             "r",
-            "w <STX>2" + strings.repeat("x", 250) + "<CR><ETX>00<CR><LF>",
+            "w <STX>2" + strings.replicate("x", 250) + "<CR><ETX>00<CR><LF>",
             "r",
             "f 2 L|1|N",
             "r",
@@ -530,7 +530,7 @@ func testReceiveCapsTheTransmission() {
     $l.profile.maxBytes = 1024;
     def steps as list of string init ["w <ENQ>", "r"];
     for (def i in 0..6) {
-        $steps[] = "f " + convert.toString(($i + 1) % 8) + " C|1|" + strings.repeat("x", 200);
+        $steps[] = "f " + convert.toString(($i + 1) % 8) + " C|1|" + strings.replicate("x", 200);
         $steps[] = "r";
     }
     def p as task of string init peer($l, $steps);
@@ -665,7 +665,7 @@ func testANoisyLineAfterARefusalIsALimit() {
     $l.profile.maxBytes = 1024;
     def p as task of string init peer(
         $l,
-        ["r", "w <ACK>", "r", "w <NAK>" + strings.repeat("x", 3000)]);
+        ["r", "w <ACK>", "r", "w <NAK>" + strings.replicate("x", 3000)]);
     try {
         send($l, parse(SMALL));
         missed("a noisy line");
@@ -691,7 +691,7 @@ func testReceiveWaitsNoLongerThanAskedDuringNoise() {
     def l as Link init pipe();
     def steps as list of string init [];
     for (def i in 0..8) {
-        $steps[] = "w " + strings.repeat("x", 60000);
+        $steps[] = "w " + strings.replicate("x", 60000);
     }
     def p as task of string init peer($l, $steps);
     def started as time.Time init time.now();
@@ -704,7 +704,7 @@ func testReceiveWaitsNoLongerThanAskedDuringNoise() {
 func testReceiveStopsANoisyOrStuckSender() {
     def l as Link init pipe();
     $l.profile.maxBytes = 1024;
-    def p as task of string init peer($l, ["w <ENQ>", "r", "w " + strings.repeat("x", 3000)]);
+    def p as task of string init peer($l, ["w <ENQ>", "r", "w " + strings.replicate("x", 3000)]);
     try {
         receive($l, 1000);
         missed("noise");

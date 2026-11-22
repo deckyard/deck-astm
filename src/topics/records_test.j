@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
 # SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
-# pragma-jennifer-version: >=0.26.0
+# pragma-jennifer-version: >=0.27.0
 
 # astm - white-box tests for the records topic. Spliced into astm_test.j via
 # include.
@@ -93,13 +93,13 @@ func capError(text as string) {
 
 func testParseCapsWhatItHolds() {
     testing.assertEqual(
-        capError("H|\\^&\rP" + strings.repeat("|", MAX_FIELDS) + "\rL|1\r"),
+        capError("H|\\^&\rP" + strings.replicate("|", MAX_FIELDS) + "\rL|1\r"),
         "astm: more than 65536 fields, repeats and components");
     testing.assertEqual(
-        capError(strings.repeat("\r", MAX_RECORDS + 1)),
+        capError(strings.replicate("\r", MAX_RECORDS + 1)),
         "astm: more than 4096 records");
     testing.assertEqual(
-        parseError("H|\\^&\rP" + strings.repeat("|", MAX_FIELDS - 7) + "\rL|1\r"),
+        parseError("H|\\^&\rP" + strings.replicate("|", MAX_FIELDS - 7) + "\rL|1\r"),
         "");
 }
 
@@ -223,7 +223,7 @@ func testMessageChecksItsRecords() {
 }
 
 func testRepeatsAreReadInLinearTime() {
-    def text as string init "H|\\^&\rO|1|S\rR|1|^^^A|1|u||N||" + strings.repeat("F\\", 50000) +
+    def text as string init "H|\\^&\rO|1|S\rR|1|^^^A|1|u||N||" + strings.replicate("F\\", 50000) +
         "F\rL|1|N\r";
     def started as time.Time init time.now();
     def found as list of Result init results(parse($text)[0]);
@@ -289,7 +289,7 @@ func testParseRefusesInvalidEscapes() {
         testing.assertContains(parseError("H|\\^&\r" + $bad + "\rL|1\r"), "escape sequence");
     }
     def started as time.Time init time.now();
-    def r as Record init parse("H|\\^&\rC|1|I|" + strings.repeat("é&H&", 20000) + "|I\rL|1\r")[0].records[1];
+    def r as Record init parse("H|\\^&\rC|1|I|" + strings.replicate("é&H&", 20000) + "|I\rL|1\r")[0].records[1];
     testing.assertEqual(len(field($r, 4)), 20000);
     testing.assertTrue(time.milliseconds(time.sub(time.now(), $started)) < 5000);
 }

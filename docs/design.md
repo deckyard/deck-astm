@@ -169,7 +169,9 @@ to be well-formed.
 
 ## Dependencies on the interpreter
 
-Floor `>=0.26.0`, capability `net`. From `jennifer`'s milestones:
+Floor `>=0.27.0`, capability `net`, for the UTF-8 codecs of
+`encoding.encode` / `decode` and `strings.replicate`. From `jennifer`'s
+milestones:
 
 - M28.46, serial read and write deadlines and a cancel that wakes a blocked
   `serial.read`: the LIS01 timers over serial rest on them. Found while
