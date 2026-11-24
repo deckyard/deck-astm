@@ -22,7 +22,7 @@ or connects:
 def link as astm.Link init astm.connect("10.0.0.20:4001", astm.profile());
 ```
 
-A serial port needs Linux and the default `jennifer` binary. LIS01's line
+A serial port needs Linux™ and the default `jennifer` binary. LIS01's line
 settings are 9600 baud, 8 data bits, no parity, 1 stop bit, no flow
 control:
 

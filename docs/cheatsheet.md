@@ -78,7 +78,7 @@ field 1 is the record type.
 | `astm.connect(address, p)` | `Link` | connect over TCP as a client |
 | `astm.listen(address)` | `net.Listener` | listen over TCP as a server |
 | `astm.accept(listener, p)` | `Link` | wait for the other side to connect |
-| `astm.openSerial(path, options, p)` | `Link` | open a serial port (Linux, default `jennifer` binary) |
+| `astm.openSerial(path, options, p)` | `Link` | open a serial port (Linux™, default `jennifer` binary) |
 | `astm.send(l, messages)` | `null` | send messages in one transmission: ENQ, frames, EOT |
 | `astm.receive(l, waitMs)` | `list of Message` | receive the next transmission; empty when none began in time |
 | `astm.close(l)` | `null` | close the link |

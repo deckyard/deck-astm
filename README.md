@@ -4,9 +4,9 @@
 [![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://deckyard.github.io/deck-astm/)
 [![release](https://img.shields.io/github/v/release/deckyard/deck-astm)](https://github.com/deckyard/deck-astm/releases/latest)
 
-The ASTM protocol of clinical laboratory instruments for
+The ASTM™ protocol of clinical laboratory instruments for
 [Jennifer](https://jennifer-lang.dev/) programs: ASTM E1381 / E1394, now
-CLSI LIS01-A2 (the low-level link) and LIS02-A2 (the records). Parse and
+CLSI™ LIS01-A2 (the low-level link) and LIS02-A2 (the records). Parse and
 build records and messages; read results, orders and host queries; answer
 queries with orders; and move messages over TCP or a serial port with the
 LIS01 handshake, framing, checksums, retries, timers and contention, for a
@@ -44,7 +44,7 @@ astm.close($link);
 ## Requirements
 
 Jennifer 0.27.0 or newer and the default `jennifer` binary: the deck needs
-`net`, which the stock `jennifer-tiny` lacks. A serial port needs Linux.
+`net`, which the stock `jennifer-tiny` lacks. A serial port needs Linux™.
 
 ## Development
 
@@ -54,6 +54,17 @@ jennifer test src/astm_test.j        # the tests, against a scripted peer
 tools/check-docs.sh                  # docs against the code
 tools/pack.sh dist                   # build the release archive
 ```
+
+## Trademarks
+
+ASTM™ is a trademark of the American Society for Testing and Materials (ASTM
+International). CLSI™ is a trademark of the Clinical and Laboratory
+Standards Institute, Inc. Linux™ is a trademark of Linus Torvalds. Other
+product and company names may be trademarks of their respective owners. They
+are used only to identify the standards and products this deck works with.
+This deck is an independent project, not affiliated with, sponsored or
+endorsed by the American Society for Testing and Materials or the Clinical
+and Laboratory Standards Institute, Inc.
 
 ## Licence
 

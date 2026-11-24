@@ -5,8 +5,8 @@
 
 Clinical laboratory instruments (chemistry, hematology and immunoassay
 analyzers) report results to a laboratory information system (LIS) and
-take orders from it with the ASTM protocol: ASTM E1381 for the low-level
-link, ASTM E1394 for the records, today published by CLSI as LIS01-A2 and
+take orders from it with the ASTM™ protocol: ASTM E1381 for the low-level
+link, ASTM E1394 for the records, today published by CLSI™ as LIS01-A2 and
 LIS02-A2. This deck speaks both, for either side: a LIS that collects
 results and answers host queries, or an instrument simulator that tests one.
 
@@ -53,5 +53,16 @@ try {
 }
 ```
 
-The deck needs the `net` capability (TCP) and, for a serial port, Linux and
+The deck needs the `net` capability (TCP) and, for a serial port, Linux™ and
 the default `jennifer` binary. It does not run on `jennifer-tiny`.
+
+## Trademarks
+
+ASTM™ is a trademark of the American Society for Testing and Materials (ASTM
+International). CLSI™ is a trademark of the Clinical and Laboratory
+Standards Institute, Inc. Linux™ is a trademark of Linus Torvalds. Other
+product and company names may be trademarks of their respective owners. They
+are used only to identify the standards and products this deck works with.
+This deck is an independent project, not affiliated with, sponsored or
+endorsed by the American Society for Testing and Materials or the Clinical
+and Laboratory Standards Institute, Inc.

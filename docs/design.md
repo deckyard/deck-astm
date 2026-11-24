@@ -6,8 +6,8 @@
 ## Scope
 
 The deck implements the protocol most clinical analyzers speak to a
-laboratory information system (LIS): ASTM E1381 / E1394, now published as
-CLSI LIS01-A2 (the low-level link) and LIS02-A2 (the records). It serves both
+laboratory information system (LIS): ASTM™ E1381 / E1394, now published as
+CLSI™ LIS01-A2 (the low-level link) and LIS02-A2 (the records). It serves both
 ends: a LIS that receives results and answers host queries, and an instrument
 simulator that sends them.
 
@@ -164,7 +164,7 @@ to be well-formed.
 - The cancel check still matches the old `"task cancelled"` message as a
   fallback for interpreters from before the `"cancelled"` kind; it goes at the
   next floor raise.
-- Serial needs Linux and the default `jennifer` binary; `jennifer-tiny` lacks
+- Serial needs Linux™ and the default `jennifer` binary; `jennifer-tiny` lacks
   `net` and `serial`.
 
 ## Dependencies on the interpreter
