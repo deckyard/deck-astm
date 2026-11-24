@@ -153,8 +153,9 @@ to be well-formed.
   through a pty null modem: a transmission arrives intact and an idle
   `receive` returns on time.
 - Not tested against a real analyzer.
-- Throughput is about 110 KB/s over loopback TCP, bounded by per-byte work;
-  ample for serial at 9600 baud (about 1 KB/s).
+- Throughput over loopback TCP is about 60 KB/s on Jennifer 0.27.0, on one
+  host (a 67 KB transmission of 1904 records), bounded by per-byte work and
+  so machine-dependent; ample for serial at 9600 baud (about 1 KB/s).
 
 ## Known limitations and open questions
 
