@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
 # SPDX-FileCopyrightText: Copyright (C) 2026 mplx <mplx@jennifer-lang.dev>
-# pragma-jennifer-version: >=0.27.0
+# pragma-jennifer-version: >=0.28.0
 
 # astm - link: the LIS01 (E1381) low-level protocol over TCP or a serial
 # port. Establishment (ENQ / ACK / NAK / EOT), frames with numbers and
@@ -228,7 +228,7 @@ export func connect(address as string, p as Profile) {
     checkProfile($p);
     def conn as net.Conn init net.Conn{};
     try {
-        $conn = net.connect($address, $p.replyTimeoutMs);
+        $conn = net.connectWith($address, net.ConnectOptions{timeoutMs: $p.replyTimeoutMs});
     } catch (e) {
         # the kinds every library shares pass on as they are
         if (generic($e.kind)) {
