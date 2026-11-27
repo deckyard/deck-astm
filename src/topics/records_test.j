@@ -94,10 +94,10 @@ func capError(text as string) {
 func testParseCapsWhatItHolds() {
     testing.assertEqual(
         capError("H|\\^&\rP" + strings.replicate("|", MAX_FIELDS) + "\rL|1\r"),
-        "astm: more than 65536 fields, repeats and components");
+        "astm: more than 262144 fields, repeats and components");
     testing.assertEqual(
         capError(strings.replicate("\r", MAX_RECORDS + 1)),
-        "astm: more than 4096 records");
+        "astm: more than 16384 records");
     testing.assertEqual(
         parseError("H|\\^&\rP" + strings.replicate("|", MAX_FIELDS - 7) + "\rL|1\r"),
         "");

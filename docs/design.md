@@ -121,10 +121,13 @@ carry.
 The peer is treated as hostile; an instrument on a lab network is not trusted
 to be well-formed.
 
-- `parse` caps at `MAX_RECORDS` (4096) records and `MAX_FIELDS` (65536)
-  fields, repeats and components. Uncapped, 1 MiB of empty fields took
-  1.1 GB and 65,530 one-field records 656 MB, since each record is a struct
-  carrying its delimiters. At the caps the worst case is roughly 70 to 130 MB.
+- `parse` caps at `MAX_RECORDS` (16384) records and `MAX_FIELDS` (262144)
+  fields, repeats and components: about 13,000 result records (a 1 MB
+  transmission) fit. Uncapped, 1 MiB of empty fields took 1.1 GB and 65,530
+  one-field records 656 MB on Jennifer 0.27.0, since each record is a struct
+  carrying its delimiters. At the caps the worst case is about 100 MB and
+  1 s on Jennifer 0.28.0: one field of 262,000 repeats read with `values`
+  (16,384 records of 16 empty fields: 85 MB).
 - `DEFAULT_MAX_BYTES` (128 KiB) bounds a transmission read or sent, small
   enough that a dense legitimate transmission stays under the parse caps;
   `maxBytes` ranges from 1 KiB to 64 MiB.
@@ -153,9 +156,9 @@ to be well-formed.
   through a pty null modem: a transmission arrives intact and an idle
   `receive` returns on time.
 - Not tested against a real analyzer.
-- Throughput over loopback TCP is about 60 KB/s on Jennifer 0.27.0, on one
+- Throughput over loopback TCP is about 80 KB/s on Jennifer 0.28.0, on one
   host (a 67 KB transmission of 1904 records), bounded by per-byte work and
-  so machine-dependent; ample for serial at 9600 baud (about 1 KB/s).
+  so dependent on the host; ample for serial at 9600 baud (about 1 KB/s).
 
 ## Known limitations and open questions
 

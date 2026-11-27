@@ -74,9 +74,9 @@ delimiter, a CR or another control character, or an invalid escape
 sequence is an error, so a record built by hand cannot turn into two on
 the wire.
 
-`parse` reads at most `MAX_RECORDS` (4096) records and `MAX_FIELDS` (65536)
+`parse` reads at most `MAX_RECORDS` (16384) records and `MAX_FIELDS` (262144)
 fields, repeats and components in one call, which bounds the memory a
-hostile sender can make it use to about 130 MB.
+hostile sender can make it use to about 100 MB.
 
 ## Results, orders and queries
 

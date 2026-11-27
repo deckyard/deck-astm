@@ -29,8 +29,8 @@ field 1 is the record type.
 | `DEFAULT_REPLY_TIMEOUT_MS` | `15000` | how long a sender waits for a reply |
 | `DEFAULT_FRAME_TIMEOUT_MS` | `30000` | how long a receiver waits for the next frame |
 | `DEFAULT_MAX_BYTES` | `131072` | the largest transmission read or sent: 128 KiB, over a thousand results |
-| `MAX_FIELDS` | `65536` | the most fields, repeats and components `parse` reads in one call |
-| `MAX_RECORDS` | `4096` | the most records `parse` reads in one call |
+| `MAX_FIELDS` | `262144` | the most fields, repeats and components `parse` reads in one call |
+| `MAX_RECORDS` | `16384` | the most records `parse` reads in one call |
 
 ## Records and messages
 

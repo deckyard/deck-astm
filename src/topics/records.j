@@ -6,11 +6,11 @@
 # escape sequences, field / repeat / component access, building records, and
 # messages from H to L. Spliced into astm.j via include.
 
-/** The most fields, repeats and components `parse` reads in one call: 65536. */
-export def const MAX_FIELDS as int init 65536;
+/** The most fields, repeats and components `parse` reads in one call: 262144. */
+export def const MAX_FIELDS as int init 262144;
 
-/** The most records `parse` reads in one call: 4096, thousands of results. */
-export def const MAX_RECORDS as int init 4096;
+/** The most records `parse` reads in one call: 16384, over ten thousand results. */
+export def const MAX_RECORDS as int init 16384;
 
 /**
  * The four delimiters of a message, read from its header record.
